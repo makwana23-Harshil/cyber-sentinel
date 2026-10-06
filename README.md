@@ -26,7 +26,7 @@ Open `frontend/index.html` in your browser (Chrome recommended).
 
 | Role  | Email | Password | Token |
 |-------|-------|----------|-------|
-| Admin | `admin@cybersentinel.com` | `Admin@2024` | `Atoken` |
+| Admin | `admin@cybersentinel.com` | `Admin@123456` | `Atoken` |
 | User  | Register at `/register.html` | Your choice | `Utoken` |
 
 ---
