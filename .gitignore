@@ -1,0 +1,12 @@
+﻿venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+*.env
+
+backend/detection/email/data/email_dataset.csv
+backend/detection/email/data/email_dataset_old.csv
+
+.vscode/
+*.log

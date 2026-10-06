@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%232b6cb0%22 d=%22M256 0c-77.9 0-149.2 32.5-201.2 88.5C21.8 123.8 0 167.3 0 214.2 0 357.6 156.4 478 243.6 507.2c7.8 2.6 17 2.6 24.8 0 87.2-29.2 243.6-149.6 243.6-293 0-46.9-21.8-90.4-54.8-125.7C405.2 32.5 333.9 0 256 0zm0 464.3c-66-26.6-192-126.3-192-250 0-33.8 15.6-65.7 40.5-91.8C145.4 80 198.8 56.6 256 56.6s110.6 23.4 151.5 65.9C432.4 148.5 448 180.4 448 214.3c0 123.7-126 223.4-192 250zM256 128c-44.1 0-80 35.9-80 80s35.9 80 80 80 80-35.9 80-80-35.9-80-80-80zm0 112c-17.6 0-32-14.4-32-32s14.4-32 32-32 32 14.4 32 32-14.4 32-32 32z%22/></svg>" type="image/svg+xml">
+  <title>Admin Dashboard — CyberSentinel</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo">
+      <div class="logo-icon"><i class="fas fa-fingerprint"></i></div>
+      <span>Cyber<span style="color:var(--blue)">Sentinel</span><span class="admin-tag">ADMIN</span></span></span>
+    </div>
+    <div class="nav-actions">
+      <span id="user-name-nav" class="text-muted admin-user-name"></span>
+      <button class="btn btn-outline btn-sm" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </nav>
+
+  <div class="container pt-nav admin-content">
+    <div class="admin-heading">
+      <h1>Admin Dashboard</h1>
+      <p class="text-muted">Platform-wide analytics, user management, and threat monitoring.</p>
+    </div>
+
+    <div class="dash-layout">
+      <!-- Sidebar -->
+      <div class="dash-sidebar">
+        <div class="user-info">
+          <div class="user-avatar admin-avatar" id="avatar-initials">A
+          </div>
+          <div>
+            <div class="name" id="sidebar-name">Admin</div>
+            <div class="role admin-role">Administrator</div>
+          </div>
+        </div>
+          <button class="sidebar-link admin-section-link active" onclick="showSection('overview')"><span class="si"><i
+              class="fas fa-chart-pie"></i></span>Overview</button>
+          <button class="sidebar-link admin-section-link" onclick="showSection('users')"><span class="si"><i
+              class="fas fa-users"></i></span>User Management</button>
+          <button class="sidebar-link admin-section-link" onclick="showSection('scans')"><span class="si"><i
+              class="fas fa-list"></i></span>All Scans</button>
+          <button class="sidebar-link admin-section-link" onclick="showSection('analytics')"><span class="si"><i
+              class="fas fa-chart-bar"></i></span>Analytics</button>
+        <div class="sidebar-logout">
+          <button class="sidebar-link admin-logout"
+            onclick="logout()">
+            <span class="si"><i class="fas fa-sign-out-alt"></i></span>Logout
+          </button>
+        </div>
+      </div>
+
+      <!-- Main -->
+      <div class="dash-main" id="admin-main">
+
+        <!-- ── OVERVIEW SECTION ── -->
+        <div id="section-overview">
+          <!-- Stats -->
+          <div class="grid-4 mb-3">
+            <div class="stat-card reveal">
+              <div class="stat-icon blue"><i class="fas fa-users admin-stat-icon-blue"></i></div>
+              <div>
+                <div class="stat-value" id="stat-users">—</div>
+                <div class="stat-label">Total Users</div>
+              </div>
+            </div>
+            <div class="stat-card reveal reveal-delay-1">
+              <div class="stat-icon green"><i class="fas fa-search admin-stat-icon-success"></i></div>
+              <div>
+                <div class="stat-value" id="stat-total-scans">—</div>
+                <div class="stat-label">Total Scans</div>
+              </div>
+            </div>
+            <div class="stat-card reveal reveal-delay-2">
+              <div class="stat-icon orange"><i class="fas fa-calendar-day admin-stat-icon-warning"></i></div>
+              <div>
+                <div class="stat-value" id="stat-today">—</div>
+                <div class="stat-label">Scans Today</div>
+              </div>
+            </div>
+            <div class="stat-card reveal reveal-delay-3">
+              <div class="stat-icon red"><i class="fas fa-shield-virus admin-stat-icon-danger"></i></div>
+              <div>
+                <div class="stat-value" id="stat-threats-today">—</div>
+                <div class="stat-label">Threats Today</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row 1 -->
+          <div class="grid-2 mb-3">
+            <div class="chart-card reveal">
+              <div class="chart-title">Global Threat Distribution</div>
+              <div class="chart-wrap"><canvas id="chart-global-verdicts"></canvas></div>
+            </div>
+            <div class="chart-card reveal reveal-delay-1">
+              <div class="chart-title">Scan Type Distribution</div>
+              <div class="chart-wrap"><canvas id="chart-global-types"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Charts Row 2 -->
+          <div class="chart-card mb-3 reveal">
+            <div class="chart-title">Platform Activity — Last 30 Days</div>
+            <div class="chart-wrap tall"><canvas id="chart-global-activity"></canvas></div>
+          </div>
+
+          <!-- Charts Row 3 -->
+          <div class="grid-2 mb-3">
+            <div class="chart-card reveal">
+              <div class="chart-title">Scan Activity by Hour (Last 7 Days)</div>
+              <div class="chart-wrap"><canvas id="chart-hourly"></canvas></div>
+            </div>
+            <div class="chart-card reveal reveal-delay-1">
+              <div class="chart-title">Top 5 Users by Scan Count</div>
+              <div class="chart-wrap"><canvas id="chart-top-users"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Top flagged domains -->
+          <div class="chart-card mb-3 reveal">
+            <div class="chart-title admin-chart-title">Top Flagged Domains</div>
+            <div id="flagged-domains-list">
+              <div class="empty-state">
+                <p>Loading...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent scans -->
+          <div class="chart-card reveal">
+            <div class="admin-section-header">
+              <div class="chart-title">Recent Platform Scans</div>
+              <button class="btn btn-outline btn-sm" onclick="showSection('scans')">View All</button>
+            </div>
+            <div class="table-wrap" id="admin-recent-table">
+              <div class="empty-state">
+                <p>Loading...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── USERS SECTION ── -->
+        <div id="section-users" class="hidden">
+          <div class="admin-section-header">
+            <h2>User Management</h2>
+            <button class="btn btn-outline btn-sm" onclick="loadUsers()"><i class="fas fa-sync"></i> Refresh</button>
+          </div>
+          <div class="chart-card">
+            <div class="table-wrap" id="users-table">
+              <div class="empty-state">
+                <p>Loading users...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── ALL SCANS SECTION ── -->
+        <div id="section-scans" class="hidden">
+          <div class="admin-section-header">
+            <h2>All Platform Scans</h2>
+            <input type="text" id="adminSearchUser" style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-soft); outline: none; font-size:0.8rem;" placeholder="Search User or text..." onkeyup="if(event.key==='Enter') loadScans(1)">
+              <select id="adminScanType" style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-soft); outline: none; font-size:0.8rem;" onchange="loadScans(1)">
+                  <option value="all">All Types</option>
+                  <option value="sms">SMS</option>
+                  <option value="email_address">Email Addr</option>
+                  <option value="email_comprehensive">Email Body</option>
+                  <option value="url">URL</option>
+              </select>
+              <button class="btn btn-outline btn-sm" onclick="loadScans(1)"><i class="fas fa-search"></i></button>
+              <button class="btn btn-outline btn-sm" onclick="document.getElementById('adminSearchUser').value=''; document.getElementById('adminScanType').value='all'; loadScans(1)"><i class="fas fa-sync"></i> Reset</button>
+          </div>
+          <div class="chart-card">
+            <div class="table-wrap" id="all-scans-table">
+              <div class="empty-state">
+                <p>Loading scans...</p>
+              </div>
+            </div>
+            <div id="scans-pagination" class="admin-pagination"></div>
+          </div>
+        </div>
+
+        <!-- ── ANALYTICS SECTION ── -->
+        <div id="section-analytics" class="hidden">
+          <h2 class="admin-analytics-title">Deep Analytics</h2>
+          <div class="grid-2 mb-3">
+            <div class="chart-card">
+              <div class="chart-title">Threats vs Safe Scans (30 Days)</div>
+              <div class="chart-wrap tall"><canvas id="chart-analytics-compare"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Scan Types Trend</div>
+              <div class="chart-wrap tall"><canvas id="chart-analytics-types"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /dash-main -->
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/animations.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+
+</html>

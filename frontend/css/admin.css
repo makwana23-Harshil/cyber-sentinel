@@ -1,0 +1,186 @@
+.admin-tag {
+  background: rgba(255, 165, 2, 0.12);
+  color: #b36b00;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+
+.admin-brand-accent {
+  color: var(--blue);
+}
+
+.user-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.admin-brand-accent {
+  color: var(--blue);
+}
+
+.admin-user-name {
+  font-size: 0.85rem;
+}
+
+.admin-content {
+  padding-top: 90px;
+}
+
+.admin-heading {
+  padding: 1.5rem 0 1rem;
+}
+
+.admin-heading h1 {
+  font-size: 1.75rem;
+}
+
+.admin-avatar {
+  background: linear-gradient(135deg, #ffa502, #ff4757);
+}
+
+.admin-role {
+  color: rgba(255,165,2,0.8);
+}
+
+.admin-section-link {
+  color: rgba(255,255,255,0.9);
+  background: transparent;
+  border: 0;
+  width: 100%;
+  text-align: left;
+}
+
+.admin-section-link:hover {
+  color: #fff;
+  background: rgba(0,212,255,0.14);
+}
+
+.admin-section-link.active {
+  color: #fff;
+  background: linear-gradient(90deg, rgba(0,212,255,0.28), rgba(0,212,255,0.12));
+  box-shadow: inset 3px 0 0 var(--blue);
+}
+
+.admin-logout {
+  background: rgba(255,71,87,0.1);
+  color: #ff7a86;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.admin-stat-icon-blue {
+  color: var(--blue);
+}
+
+.admin-stat-icon-success {
+  color: var(--success);
+}
+
+.admin-stat-icon-warning {
+  color: var(--warning);
+}
+
+.admin-stat-icon-danger {
+  color: var(--danger);
+}
+
+.admin-chart-title {
+  margin-bottom: 1rem;
+}
+
+.admin-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.admin-section-header h2,
+.admin-analytics-title {
+  font-size: 1.25rem;
+}
+
+.admin-analytics-title {
+  margin-bottom: 1.25rem;
+}
+
+.admin-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 1rem;
+}
+
+.admin-domain-item {
+  justify-content: space-between;
+}
+
+.admin-domain-url {
+  font-family: monospace;
+  font-size: 0.82rem;
+}
+
+.admin-table-content {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.admin-table-content-small {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+
+.admin-table-email {
+  font-size: 0.82rem;
+}
+
+.admin-table-number {
+  font-weight: 700;
+}
+
+.admin-table-date {
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+.admin-table-user {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.admin-table-index {
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+.admin-table-risk {
+  font-weight: 700;
+}
+
+.admin-table-time {
+  font-size: 0.8rem;
+}
+
+.admin-protected-label {
+  font-size: 0.8rem;
+}
+
+.admin-role-badge {
+  background: rgba(255,165,2,0.12);
+  color: #b36b00;
+}
+
+.admin-chart-grid {
+  margin-bottom: 1.25rem;
+}

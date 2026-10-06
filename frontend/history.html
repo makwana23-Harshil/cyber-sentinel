@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%232b6cb0%22 d=%22M256 0c-77.9 0-149.2 32.5-201.2 88.5C21.8 123.8 0 167.3 0 214.2 0 357.6 156.4 478 243.6 507.2c7.8 2.6 17 2.6 24.8 0 87.2-29.2 243.6-149.6 243.6-293 0-46.9-21.8-90.4-54.8-125.7C405.2 32.5 333.9 0 256 0zm0 464.3c-66-26.6-192-126.3-192-250 0-33.8 15.6-65.7 40.5-91.8C145.4 80 198.8 56.6 256 56.6s110.6 23.4 151.5 65.9C432.4 148.5 448 180.4 448 214.3c0 123.7-126 223.4-192 250zM256 128c-44.1 0-80 35.9-80 80s35.9 80 80 80 80-35.9 80-80-35.9-80-80-80zm0 112c-17.6 0-32-14.4-32-32s14.4-32 32-32 32 14.4 32 32-14.4 32-32 32z%22/></svg>" type="image/svg+xml">
+  <title>Scan History — CyberSentinel</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/history.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar">
+  <div class="nav-logo">
+    <div class="logo-icon"><i class="fas fa-fingerprint"></i></div>
+    <span>Cyber<span style="color:var(--blue)">Sentinel</span></span>
+  </div>
+  <div class="nav-links">
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="scan.html" class="nav-link">Scanner</a>
+    <a href="history.html" class="nav-link active">History</a>
+  </div>
+  <div class="nav-actions">
+    <span id="user-name-nav" class="text-muted history-user-name"></span>
+    <a href="scan.html" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> New Scan</a>
+  </div>
+</nav>
+
+<div class="container pt-nav history-content">
+  <div class="history-heading">
+    <h1>Scan History</h1>
+    <p class="text-muted">All your past threat detection results in one place.</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <i class="fas fa-search si"></i>
+      <input type="text" id="search-input" placeholder="Search by content, verdict..." oninput="filterScans()">
+    </div>
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn" data-filter="sms" onclick="setFilter('sms',this)">SMS</button>
+    <button class="filter-btn" data-filter="email_address" onclick="setFilter('email_address',this)">Email Addr</button>
+    <button class="filter-btn" data-filter="email_comprehensive" onclick="setFilter('email_comprehensive',this)">Email Comprehensive</button>
+    <button class="filter-btn" data-filter="url" onclick="setFilter('url',this)">URL</button>
+    <form id="dateFilterForm" onsubmit="event.preventDefault(); loadHistory();" style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+      <span style="font-size:0.8rem; font-weight:600; color:var(--text-secondary);">From:</span>
+      <input type="date" id="startDate" class="filter-btn" style="padding: 5px 10px; border-radius: 10px; font-size: 0.82rem; border: 1px solid var(--border-soft); background: #fff; color: var(--text-primary); outline: none;">
+      <span style="font-size:0.8rem; font-weight:600; color:var(--text-secondary);">To:</span>
+      <input type="date" id="endDate" class="filter-btn" style="padding: 5px 10px; border-radius: 10px; font-size: 0.82rem; border: 1px solid var(--border-soft); background: #fff; color: var(--text-primary); outline: none;">
+      <button type="submit" class="btn btn-sm btn-primary" style="padding: 6px 12px; border-radius: 10px; font-size: 0.82rem; font-weight: 600;"><i class="fas fa-filter"></i> Filter</button>
+    </form>      
+    <button class="filter-btn threat-filter" data-filter="threats" onclick="setFilter('threats',this)">Threats Only</button>
+  </div>
+
+  <!-- Table -->
+  <div class="chart-card">
+    <div class="table-wrap" id="history-table">
+      <div class="empty-state"><div class="history-loading-spinner" aria-hidden="true"></div><p>Loading history...</p></div>
+    </div>
+    <div id="user-scans-pagination" class="admin-pagination"></div><div id="no-results" class="empty-state hidden">
+      <div class="empty-icon"><i class="fas fa-magnifying-glass"></i></div>
+      <p>No scans match your search or filter.</p>
+      <a href="scan.html" class="btn btn-primary mt-2">Run a New Scan</a>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/animations.js"></script>
+<script src="js/history.js"></script>
+</body>
+</html>

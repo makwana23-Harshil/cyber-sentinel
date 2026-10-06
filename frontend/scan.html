@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%232b6cb0%22 d=%22M256 0c-77.9 0-149.2 32.5-201.2 88.5C21.8 123.8 0 167.3 0 214.2 0 357.6 156.4 478 243.6 507.2c7.8 2.6 17 2.6 24.8 0 87.2-29.2 243.6-149.6 243.6-293 0-46.9-21.8-90.4-54.8-125.7C405.2 32.5 333.9 0 256 0zm0 464.3c-66-26.6-192-126.3-192-250 0-33.8 15.6-65.7 40.5-91.8C145.4 80 198.8 56.6 256 56.6s110.6 23.4 151.5 65.9C432.4 148.5 448 180.4 448 214.3c0 123.7-126 223.4-192 250zM256 128c-44.1 0-80 35.9-80 80s35.9 80 80 80 80-35.9 80-80-35.9-80-80-80zm0 112c-17.6 0-32-14.4-32-32s14.4-32 32-32 32 14.4 32 32-14.4 32-32 32z%22/></svg>" type="image/svg+xml">
+  <title>Threat Scanner — CyberSentinel</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/scan.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo">
+      <div class="logo-icon"><i class="fas fa-fingerprint"></i></div>
+      <span>Cyber<span style="color:var(--blue)">Sentinel</span></span>
+    </div>
+    <div class="nav-links">
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="scan.html" class="nav-link active">Scanner</a>
+      <a href="history.html" class="nav-link">History</a>
+    </div>
+    <div class="nav-actions">
+      <span id="user-name-nav" class="text-muted" style="font-size:0.85rem;"></span>
+      <button class="btn btn-outline btn-sm" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </nav>
+
+  <!-- Loading Overlay -->
+  <div id="scan-loading" class="scan-loading-overlay hidden">
+    <div class="scan-ring">
+      <div class="scan-line"></div>
+    </div>
+    <div class="scan-loading-text" id="scan-loading-title">Analyzing...</div>
+    <div class="scan-step-list" id="scan-steps">
+      <div class="scan-step" id="step-1"><span class="step-dot"></span> Running ML analysis</div>
+      <div class="scan-step" id="step-2"><span class="step-dot"></span> Extracting URLs</div>
+      <div class="scan-step" id="step-3"><span class="step-dot"></span> Deep link inspection</div>
+      <div class="scan-step" id="step-4"><span class="step-dot"></span> Checking VirusTotal</div>
+      <div class="scan-step" id="step-5"><span class="step-dot"></span> Generating report</div>
+    </div>
+  </div>
+
+  <div class="container pt-nav" style="padding-top:90px;">
+    <div style="padding:1.5rem 0 1rem;">
+      <h1 style="font-size:1.75rem;">Threat Scanner</h1>
+      <p class="text-muted">Select a scan type and submit your content for AI-powered analysis.</p>
+    </div>
+
+    <div class="scan-layout">
+      <!-- Sidebar -->
+      <div class="scan-sidebar">
+        <h3>Scan Type</h3>
+        <button class="scan-nav-item active" onclick="switchPanel('sms')" id="nav-sms">
+          <span class="icon"><i class="fas fa-comment-alt"></i></span> SMS Scanner
+        </button>
+        <button class="scan-nav-item" onclick="switchPanel('email-address')" id="nav-email-address">
+          <span class="icon"><i class="fas fa-envelope"></i></span> Email Address
+        </button>
+        <button class="scan-nav-item" onclick="switchPanel('email-comprehensive')" id="nav-email-comprehensive">
+          <span class="icon"><i class="fas fa-layer-group"></i></span> Comprehensive Email
+        </button>
+        <button class="scan-nav-item" onclick="switchPanel('url')" id="nav-url">
+          <span class="icon"><i class="fas fa-link"></i></span> URL / Link
+        </button>
+
+        <div class="section-divider" style="margin:1rem 0;"></div>
+        <h3>Quick Links</h3>
+        <a href="dashboard.html" class="scan-nav-item" style="text-decoration:none;">
+          <span class="icon"><i class="fas fa-chart-bar"></i></span> Dashboard
+        </a>
+        <a href="history.html" class="scan-nav-item" style="text-decoration:none;">
+          <span class="icon"><i class="fas fa-history"></i></span> History
+        </a>
+      </div>
+
+      <!-- Main Area -->
+      <div class="scan-main">
+
+        <!-- ── SMS PANEL ── -->
+        <div class="scan-panel active" id="panel-sms">
+          <div class="panel-header">
+            <h2><i class="fas fa-comment-alt"></i> SMS Spam Detection</h2>
+            <p>Paste the SMS text below. Our ML model will classify it and inspect any embedded links in real-time.</p>
+          </div>
+          <div class="scan-card">
+            <div class="form-group">
+              <label class="form-label">SMS Message Text</label>
+              <textarea class="form-textarea" id="sms-input"
+                placeholder="Paste the SMS message here e.g. 'WINNER!! You have won a £1000 prize. Call 09061701461 to claim...'"
+                style="min-height:140px;"></textarea>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-label">
+                Deep Link Inspection
+                <small>Crawl any URLs found in the SMS</small>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="sms-inspect" checked>
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+            <button class="btn btn-primary btn-block btn-lg btn-ripple scan-btn" onclick="runScan('sms')">
+              <i class="fas fa-search"></i> Analyze SMS
+            </button>
+          </div>
+          <div id="result-sms" class="hidden"></div>
+        </div>
+
+        <!-- ── EMAIL ADDRESS PANEL ── -->
+        <div class="scan-panel" id="panel-email-address">
+          <div class="panel-header">
+            <h2><i class="fas fa-envelope"></i> Email Address Validation</h2>
+            <p>Check if an email address is valid, real, or potentially fake. We verify syntax, DNS MX records, domain
+              age and disposable email detection.</p>
+          </div>
+          <div class="scan-card">
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <div class="input-icon-wrap">
+                <i class="input-icon fas fa-envelope"></i>
+                <input type="email" class="form-input" id="email-addr-input" placeholder="suspicious@example.com"
+                  style="font-size:1rem;">
+              </div>
+            </div>
+            
+            <!-- Added LLM Toggle Row Matching SMS Style -->
+            <div class="toggle-row">
+              <div class="toggle-label">
+                AI Deep Verification
+                <small>Use Gemini LLM for real-world domain authenticity analysis</small>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="email-addr-llm" checked>
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+
+            <button class="btn btn-primary btn-block btn-lg btn-ripple scan-btn" onclick="runScan('email-address')">
+              <i class="fas fa-search"></i> Validate Email Address
+            </button>
+          </div>
+          <div id="result-email-address" class="hidden"></div>
+        </div>
+
+        <!-- ── COMPREHENSIVE EMAIL PANEL ── -->
+        <div class="scan-panel" id="panel-email-comprehensive">
+          <div class="panel-header">
+            <h2><i class="fas fa-layer-group"></i> Comprehensive Email Phishing Scan</h2>
+            <p>Provide the sender address, subject, and body content together. Our ML model evaluates all features
+              simultaneously with full confidence and probability metrics.</p>
+          </div>
+          <div class="scan-card">
+            <div class="form-group">
+              <label class="form-label">Sender Email / Address</label>
+              <input type="text" class="form-input" id="comprehensive-sender"
+                placeholder="e.g. support@secure-update.com" style="margin-bottom: 1rem;">
+
+              <label class="form-label">Email Subject</label>
+              <input type="text" class="form-input" id="comprehensive-subject"
+                placeholder="e.g. Action Required: Update Your Account Information" style="margin-bottom: 1rem;">
+
+              <label class="form-label">Email Body Content</label>
+              <textarea class="form-textarea" id="comprehensive-body"
+                placeholder="Paste full email body content here..." style="min-height:140px;"></textarea>
+            </div>
+
+            <!-- Added LLM Toggle Row Matching SMS Style -->
+            <div class="toggle-row">
+              <div class="toggle-label">
+                AI Deep Verification
+                <small>Use Gemini LLM for real-world domain authenticity analysis</small>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="email-comprehensive-llm" checked>
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+
+            <button class="btn btn-primary btn-block btn-lg btn-ripple scan-btn" onclick="runScan('email-comprehensive')">
+              <i class="fas fa-search"></i> Run Comprehensive Scan
+            </button>
+          </div>
+          <div id="result-email-comprehensive" class="hidden"></div>
+        </div>
+
+        <!-- ── URL PANEL ── -->
+        <div class="scan-panel" id="panel-url">
+          <div class="panel-header">
+            <h2><i class="fas fa-link"></i> URL / Link Inspector</h2>
+            <p>Enter any URL for comprehensive analysis: ML phishing detection, live crawl, SSL check, redirect
+              analysis, content inspection, VirusTotal & Google Safe Browsing.</p>
+          </div>
+          <div class="scan-card">
+            <div class="form-group">
+              <label class="form-label">URL to Inspect</label>
+              <div class="input-icon-wrap">
+                <i class="input-icon fas fa-globe"></i>
+                <input type="url" class="form-input" id="url-input"
+                  placeholder="https://suspicious-site.com/login?verify=true" style="font-size:0.95rem;">
+              </div>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-label">
+                Deep Crawl (Recommended)
+                <small>Visit the URL, follow redirects, inspect live content</small>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="url-inspect" checked>
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+            <button class="btn btn-primary btn-block btn-lg btn-ripple scan-btn" onclick="runScan('url')">
+              <i class="fas fa-search"></i> Inspect URL
+            </button>
+          </div>
+          <div id="result-url" class="hidden"></div>
+        </div>
+
+      </div><!-- /scan-main -->
+    </div><!-- /scan-layout -->
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/animations.js"></script>
+  <script src="js/scan.js"></script>
+
+  <script>
+    const token = sessionStorage.getItem('Utoken');
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+
+  </script>
+</body>
+
+</html>
