@@ -7,18 +7,18 @@ function isAdminPage() {return window.location.pathname.includes('admin');}
 // Get JWT token for current page
 function getToken() {
     if (isAdminPage()) {
-        return sessionStorage.getItem('Atoken') || null;
+        return sessionStorage.getItem('Atoken') || localStorage.getItem('Atoken') || null;
     }
-    return sessionStorage.getItem('Utoken') || null;
+    return sessionStorage.getItem('Utoken') || localStorage.getItem('Utoken') || null;
 }
 
 // Get current user data
 function getUserData() {
     try {
         if (isAdminPage()) {
-            return JSON.parse(sessionStorage.getItem('admin_data') || '{}');
+            return JSON.parse(sessionStorage.getItem('admin_data') || localStorage.getItem('admin_data') || '{}');
         }
-        return JSON.parse(sessionStorage.getItem('user_data') || '{}');
+        return JSON.parse(sessionStorage.getItem('user_data') || localStorage.getItem('user_data') || '{}');
     } catch (error) {
         console.error('Failed to read user data:', error);
         return {};
@@ -40,21 +40,21 @@ function logout() {
             }
         }).catch(() => {});
     }
-    // Remove only current role's session
-    if (isAdminPage()) {
-        sessionStorage.removeItem('Atoken');
-        sessionStorage.removeItem('admin_data');
-    } else {
-        sessionStorage.removeItem('Utoken');
-        sessionStorage.removeItem('user_data');
-    }
+    sessionStorage.removeItem('Atoken');
+    sessionStorage.removeItem('admin_data');
+    sessionStorage.removeItem('Utoken');
+    sessionStorage.removeItem('user_data');
+    localStorage.removeItem('Atoken');
+    localStorage.removeItem('admin_data');
+    localStorage.removeItem('Utoken');
+    localStorage.removeItem('user_data');
     showToast('Logged out successfully', 'info');
     setTimeout(() => {window.location.href = 'login.html';}, 800);
 }
 
 // Require normal user authentication
 function requireAuth(redirectTo = 'login.html') {
-    const token = sessionStorage.getItem('Utoken');
+    const token = sessionStorage.getItem('Utoken') || localStorage.getItem('Utoken');
     if (!token) {
         window.location.href = redirectTo;
         return false;
@@ -64,7 +64,7 @@ function requireAuth(redirectTo = 'login.html') {
 
 // Require admin authentication
 function requireAdmin() {
-    const token = sessionStorage.getItem('Atoken');
+    const token = sessionStorage.getItem('Atoken') || localStorage.getItem('Atoken');
     if (!token) {
         window.location.href = 'login.html';
         return false;

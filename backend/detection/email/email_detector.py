@@ -133,17 +133,10 @@ def analyze_email_address(email: str) -> dict:
 
 # SMTP / TLS CHECK
 def _check_mail_server_tls(mail_servers: list) -> bool:
-    """
-    Confirm TLS support on the mail server.
-    Step 1: Check if server belongs to a known TLS-supporting provider.
-    Step 2: Fallback - try live SMTP connections on ports 465, 587, 25.
-    Note: Major providers (Google, Microsoft, Yahoo) block unauthenticated
-    SMTP test connections, so provider detection is the primary method.
-    """
+
     if not mail_servers:
         return False
 
-    # Known providers that ALWAYS support TLS - detected by MX hostname
     KNOWN_TLS_PROVIDERS = [
         "google.com", "googlemail.com",
         "outlook.com", "hotmail.com",

@@ -1,7 +1,3 @@
-if (sessionStorage.getItem('Utoken')) {
-  window.location.href = 'dashboard.html';
-}
-
 function togglePw() {
   const pw = document.getElementById('password');
   const eye = document.getElementById('pw-eye');
@@ -62,6 +58,12 @@ document.getElementById('reg-form').addEventListener('submit', async (e) => {
     const res = await API.post('/api/auth/register', { name, email, password });
     const data = await res.json();
     if (!res.ok || !data.success) throw new Error(data.message || 'Registration failed');
+    sessionStorage.removeItem('Atoken');
+    sessionStorage.removeItem('admin_data');
+    localStorage.removeItem('Atoken');
+    localStorage.removeItem('admin_data');
+    sessionStorage.setItem('Utoken', data.token);
+    sessionStorage.setItem('user_data', JSON.stringify(data.user));
     localStorage.setItem('Utoken', data.token);
     localStorage.setItem('user_data', JSON.stringify(data.user));
     showToast('Account created! Welcome to CyberSentinel Pro!', 'success');

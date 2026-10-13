@@ -1,7 +1,6 @@
 import os
 import sys
 from datetime import datetime, timezone
-# Ensure backend directory is in path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
@@ -21,7 +20,6 @@ def create_app():
     CORS(app, resources={r"/api/*": {"origins": Config.CORS_ORIGINS}},
          supports_credentials=True)
 
-    # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(detect_bp)
     app.register_blueprint(user_bp)
@@ -32,13 +30,10 @@ def create_app():
     def health():
         return jsonify({'status': 'ok', 'service': 'CyberSentinel Pro API'})
 
-    # Serve frontend static files (optional)
     frontend_dir = os.path.join(os.path.dirname(__file__), '..', 'frontend')
-
     @app.route('/')
     def index():
         return send_from_directory(frontend_dir, 'index.html')
-
     @app.route('/<path:path>')
     def serve_static(path):
         try:
@@ -46,7 +41,6 @@ def create_app():
         except Exception:
             return send_from_directory(frontend_dir, 'index.html')
 
-    # Error handlers
     @app.errorhandler(404)
     def not_found(e):
         return jsonify({'success': False, 'message': 'Endpoint not found'}), 404
@@ -57,7 +51,13 @@ def create_app():
 
     with app.app_context():
         _seed_admin(app)
-
+        try:
+            from api.admin_routes import purge_orphaned_scans
+            purged = purge_orphaned_scans()
+            if purged > 0:
+                print(f"[CyberSentinel] Purged {purged} orphaned scan(s) from deleted users.")
+        except Exception as e:
+            print("[CyberSentinel] Startup scan purge warning:", e)
     return app
 
 def _seed_admin(app):
@@ -94,7 +94,7 @@ if __name__ == '__main__':
     print("\n" + "="*55)
     print("  CyberSentinel Pro — Backend Running")
     print("  http://127.0.0.1:5000")
-    print("  Admin: admin@cybersentinel.com / Admin@2024")
+
     print("="*55 + "\n")
     
     # Run the application with the reloader disabled to prevent socket crashes

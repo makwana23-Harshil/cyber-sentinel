@@ -1,14 +1,18 @@
 from database import db
 from auth.middleware import hash_password
 from datetime import datetime, timezone
+from config import Config
 
 
-ADMIN_NAME = "CyberSentinel Admin"
-ADMIN_EMAIL = "admin@cybersentinel.com"
-ADMIN_PASSWORD = "Admin@123456"
+ADMIN_NAME = Config.ADMIN_NAME
+ADMIN_EMAIL = Config.ADMIN_EMAIL
+ADMIN_PASSWORD = Config.ADMIN_PASSWORD
 
 
 def create_admin():
+    if not ADMIN_PASSWORD:
+        raise RuntimeError("Set ADMIN_PASSWORD in backend/.env or the environment.")
+
     email = ADMIN_EMAIL.lower().strip()
 
     # Check whether admin already exists
@@ -48,7 +52,6 @@ def create_admin():
     print(f"ID       : {result.inserted_id}")
     print(f"Name     : {ADMIN_NAME}")
     print(f"Email    : {ADMIN_EMAIL}")
-    print(f"Password : {ADMIN_PASSWORD}")
     print("Role     : admin")
     print("Status   : Active")
     print("===================================\n")

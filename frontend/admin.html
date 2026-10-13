@@ -170,16 +170,27 @@
         <div id="section-scans" class="hidden">
           <div class="admin-section-header">
             <h2>All Platform Scans</h2>
-            <input type="text" id="adminSearchUser" style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-soft); outline: none; font-size:0.8rem;" placeholder="Search User or text..." onkeyup="if(event.key==='Enter') loadScans(1)">
-              <select id="adminScanType" style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-soft); outline: none; font-size:0.8rem;" onchange="loadScans(1)">
-                  <option value="all">All Types</option>
-                  <option value="sms">SMS</option>
-                  <option value="email_address">Email Addr</option>
-                  <option value="email_comprehensive">Email Body</option>
-                  <option value="url">URL</option>
-              </select>
-              <button class="btn btn-outline btn-sm" onclick="loadScans(1)"><i class="fas fa-search"></i></button>
-              <button class="btn btn-outline btn-sm" onclick="document.getElementById('adminSearchUser').value=''; document.getElementById('adminScanType').value='all'; loadScans(1)"><i class="fas fa-sync"></i> Reset</button>
+          </div>
+          <div class="admin-filter-bar">
+            <input type="text" id="adminSearchUser" class="admin-filter-input" placeholder="Search User or content..." onkeyup="if(event.key==='Enter') loadScans(1)">
+            <select id="adminScanType" class="admin-filter-select" onchange="loadScans(1)">
+              <option value="all">All Types</option>
+              <option value="sms">SMS</option>
+              <option value="email_address">Email Addr</option>
+              <option value="email_comprehensive">Email Body</option>
+              <option value="url">URL</option>
+            </select>
+            <div class="admin-date-group">
+              <span class="filter-label">From:</span>
+              <input type="date" id="adminStartDate" class="date-picker-input">
+              <span class="filter-label">To:</span>
+              <input type="date" id="adminEndDate" class="date-picker-input">
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="loadScans(1)" title="Apply Filters"><i class="fas fa-search"></i> Search</button>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('adminSearchUser').value=''; document.getElementById('adminScanType').value='all'; document.getElementById('adminStartDate').value=''; document.getElementById('adminEndDate').value=''; loadScans(1)" title="Reset Filters"><i class="fas fa-sync"></i> Reset</button>
+            <button onclick="adminDownloadCSV()" class="btn btn-sm btn-download-csv" title="Download filtered scans as CSV">
+              <i class="fas fa-download"></i> Download CSV
+            </button>
           </div>
           <div class="chart-card">
             <div class="table-wrap" id="all-scans-table">

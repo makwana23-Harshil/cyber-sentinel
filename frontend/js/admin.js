@@ -1,3 +1,26 @@
+function formatIST(dateString) {
+  if (!dateString) return '—';
+  try {
+    let str = String(dateString).trim();
+    if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(\.\d+)?$/.test(str)) {
+      str = str.replace(' ', 'T') + 'Z';
+    }
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return dateString;
+    return d.toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  } catch (e) {
+    return dateString;
+  }
+}
+
 if (!requireAdmin()) {
   // requireAdmin redirects unauthorized users to the login page.
 } else {
@@ -92,7 +115,7 @@ function renderOverview(dash, stats) {
 
   const topUsers = stats.top_users || [];
   renderBar('chart-top-users', {
-    labels: topUsers.map(user => user.name.split(' ')[0]),
+    labels: topUsers.map(user => ((user.name || 'User').split(' ')[0])),
     data: topUsers.map(user => user.scans),
     label: 'Scans',
     color: ['#00D4FF', '#7B5EA7', '#FFA502', '#FF4757', '#2ED573']
@@ -107,7 +130,7 @@ function renderOverview(dash, stats) {
         <span class="badge badge-dangerous">${domain.count} flag${domain.count > 1 ? 's' : ''}</span>
       </div>`).join('');
   } else {
-    domainsElement.innerHTML = `<div class="empty-state"><div class="empty-icon">🎉</div><p>No flagged domains yet</p></div>`;
+    domainsElement.innerHTML = `<div class="empty-state"><p>No flagged domains yet</p></div>`;
   }
 
   renderAdminRecentTable(dash.recent_scans || []);
@@ -123,17 +146,17 @@ function renderAdminRecentTable(scans) {
   const rows = scans.map(scan => {
     const verdict = scan.verdict || '';
     const className = ['DANGEROUS', 'PHISHING', 'SPAM'].includes(verdict) ? 'badge-dangerous' : verdict === 'SUSPICIOUS' ? 'badge-suspicious' : 'badge-safe';
-    const date = new Date(scan.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const date = formatIST(scan.created_at);
     return `<tr>
-      <td><span style="text-transform: uppercase; font-weight: bold;">${(iconMap[scan.scan_type] || scan.scan_type).replace('_', ' ')}</span></td>
-      <td class="admin-table-content">${scan.input_text}</td>
-      <td><span class="badge ${className}">${verdict}</span></td>
-      <td class="admin-table-risk">${scan.risk_score || 0}/100</td>
-      <td class="admin-table-date">${date}</td>
-      <td class="admin-table-user">${scan.user_id || 'Anonymous'}</td>
+      <td data-label="Type"><span style="text-transform: uppercase; font-weight: bold;">${(iconMap[scan.scan_type] || scan.scan_type).replace('_', ' ')}</span></td>
+      <td class="admin-table-content" data-label="Input"><span class="mobile-table-value">${scan.input_text}</span></td>
+      <td data-label="Verdict"><span class="badge ${className}">${verdict}</span></td>
+      <td class="admin-table-risk" data-label="Risk">${scan.risk_score || 0}/100</td>
+      <td class="admin-table-date" data-label="Time">${date}</td>
+      <td class="admin-table-user" data-label="User">${scan.user_id || 'Anonymous'}</td>
     </tr>`;
   }).join('');
-  wrap.innerHTML = `<table><thead><tr><th>Type</th><th>Input</th><th>Verdict</th><th>Risk</th><th>Time</th><th>User</th></tr></thead><tbody>${rows}</tbody></table>`;
+  wrap.innerHTML = `<table class="admin-recent-scans-table"><thead><tr><th>Type</th><th>Input</th><th>Verdict</th><th>Risk</th><th>Time</th><th>User</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 async function loadUsers() {
@@ -161,32 +184,34 @@ async function loadUsers() {
           status = `<span class="badge badge-dangerous">Deleted</span>`;
       }
 
-      const joined = new Date(user.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+      const joined = formatIST(user.created_at);
       const rowStyle = isDeleted ? 'style="opacity: 0.6; background-color: #f3f4f6;"' : '';
       
       let actionBtn = '<span class="text-muted admin-protected-label">Protected</span>';
       if (user.role !== 'admin') {
           if (isDeleted) {
-              actionBtn = `<span style="color:var(--text-secondary); font-size: 0.8rem; font-weight: 600;">Deleted</span>`;
+              actionBtn = `<div class="user-actions">
+                <button class="btn btn-success btn-sm" onclick="restoreUser('${user.id}', '${(user.name || 'User').replace(/'/g, "\\'")}')" title="Restore user account"><i class="fas fa-undo"></i> Restore</button>
+              </div>`;
           } else {
               actionBtn = `<div class="user-actions">
                 <button class="btn btn-outline btn-sm" onclick="toggleUser('${user.id}')">${user.is_active ? 'Deactivate' : 'Activate'}</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteUser('${user.id}', '${user.name}')"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-danger btn-sm" onclick="deleteUser('${user.id}', '${(user.name || 'User').replace(/'/g, "\\'")}')" title="Delete user account"><i class="fas fa-trash"></i></button>
               </div>`;
           }
       }
 
       return `<tr ${rowStyle}>
-        <td><strong style="${isDeleted ? 'text-decoration: line-through;' : ''}">${user.name}</strong></td>
-        <td class="admin-table-email">${user.email}</td>
-        <td>${roleBadge}</td>
-        <td>${status}</td>
-        <td class="admin-table-number">${user.total_scans || 0}</td>
-        <td class="admin-table-date">${joined}</td>
-        <td>${actionBtn}</td>
+        <td data-label="Name"><strong style="${isDeleted ? 'text-decoration: line-through;' : ''}">${user.name}</strong></td>
+        <td class="admin-table-email" data-label="Email">${user.email}</td>
+        <td data-label="Role">${roleBadge}</td>
+        <td data-label="Status">${status}</td>
+        <td class="admin-table-number" data-label="Scans">${user.total_scans || 0}</td>
+        <td class="admin-table-date" data-label="Joined">${joined}</td>
+        <td data-label="Actions">${actionBtn}</td>
       </tr>`;
     }).join('');
-    wrap.innerHTML = `<table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Scans</th><th>Joined</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+    wrap.innerHTML = `<table class="admin-users-table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Scans</th><th>Joined</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
   } catch (e) {
     wrap.innerHTML = `<div class="empty-state"><p>Error: ${e.message}</p></div>`;
   }
@@ -206,7 +231,7 @@ async function toggleUser(userId) {
 }
 
 async function deleteUser(userId, name) {
-  if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
+  if (!confirm(`Delete user "${name}"? You can restore this account later.`)) return;
   try {
     const res = await API.del(`/api/admin/user/${userId}`);
     const data = await res.json();
@@ -219,6 +244,20 @@ async function deleteUser(userId, name) {
   }
 }
 
+async function restoreUser(userId, name) {
+  if (!confirm(`Restore account for user "${name}"?`)) return;
+  try {
+    const res = await API.post(`/api/admin/user/${userId}/restore`, {});
+    const data = await res.json();
+    if (data.success) {
+      showToast('User account restored successfully', 'success');
+      loadUsers();
+    } else showToast(data.message || 'Failed to restore user', 'error');
+  } catch {
+    showToast('Failed to restore user', 'error');
+  }
+}
+
 async function loadScans(page = 1) {
   currentScansPage = page;
   const wrap = document.getElementById('all-scans-table');
@@ -226,9 +265,18 @@ async function loadScans(page = 1) {
   
   const search = document.getElementById('adminSearchUser') ? document.getElementById('adminSearchUser').value : '';
   const scanType = document.getElementById('adminScanType') ? document.getElementById('adminScanType').value : 'all';
+  const start = document.getElementById('adminStartDate')?.value || '';
+  const end = document.getElementById('adminEndDate')?.value || '';
+  const params = new URLSearchParams({
+    page: String(page),
+    search,
+    scan_type: scanType
+  });
+  if (start) params.set('start', start);
+  if (end) params.set('end', end);
   
   try {
-    const res = await API.get(`/api/admin/scans?page=${page}&search=${encodeURIComponent(search)}&scan_type=${encodeURIComponent(scanType)}`);
+    const res = await API.get(`/api/admin/scans?${params.toString()}`);
     const data = await res.json();
     if (!data.success) throw new Error(data.message);
     const iconMap = { sms: 'SMS', email_address: 'EMAIL', email_comprehensive: 'BODY', url: 'URL' };
@@ -237,21 +285,19 @@ async function loadScans(page = 1) {
       const className = ['DANGEROUS', 'PHISHING', 'SPAM'].includes(verdict)
         ? 'badge-dangerous'
         : verdict === 'SUSPICIOUS' ? 'badge-suspicious' : 'badge-safe';
-      const date = new Date(scan.created_at).toLocaleDateString('en', {
-        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-      });
+      const date = formatIST(scan.created_at);
       return `<tr>
-        <td class="admin-table-index">${((page - 1) * 10) + index + 1}</td>
-        <td><span style="text-transform: uppercase; font-weight: bold;">${(iconMap[scan.scan_type] || scan.scan_type).replace('_', ' ')}</span></td>
-        <td class="admin-table-content-small" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(scan.input_text||'').replace(/""/g, '&quot;')}">${scan.input_text}</td>
-        <td><span class="badge ${className}">${verdict}</span></td>
-        <td class="admin-table-risk">${scan.risk_score || 0}/100</td>
-        <td class="admin-table-time">${date}</td>
-        <td class="admin-table-user">${scan.user_id || 'Anonymous'}</td>
+        <td class="admin-table-index" data-label="#">${((page - 1) * 10) + index + 1}</td>
+        <td data-label="Type"><span style="text-transform: uppercase; font-weight: bold;">${(iconMap[scan.scan_type] || scan.scan_type).replace('_', ' ')}</span></td>
+        <td class="admin-table-content-small" data-label="Input" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(scan.input_text||'').replace(/""/g, '&quot;')}"><span class="mobile-table-value">${scan.input_text}</span></td>
+        <td data-label="Verdict"><span class="badge ${className}">${verdict}</span></td>
+        <td class="admin-table-risk" data-label="Risk">${scan.risk_score || 0}/100</td>
+        <td class="admin-table-time" data-label="Time">${date}</td>
+        <td class="admin-table-user" data-label="User">${scan.user_id || 'Anonymous'}</td>
       </tr>`;
     }).join('');
 
-    wrap.innerHTML = `<table><thead><tr><th>Sr.No</th><th>Type</th><th>Input</th><th>Verdict</th><th>Risk</th><th>Time</th><th>User</th></tr></thead><tbody>${rows}</tbody></table>`;
+    wrap.innerHTML = `<table class="admin-scans-table"><thead><tr><th>Sr.No</th><th>Type</th><th>Input</th><th>Verdict</th><th>Risk</th><th>Time</th><th>User</th></tr></thead><tbody>${rows}</tbody></table>`;
 
     const pagination = document.getElementById('scans-pagination');
     pagination.style.display = 'block'; pagination.style.textAlign = 'center'; pagination.style.lineHeight = '2.5'; pagination.innerHTML = '';
@@ -320,4 +366,51 @@ function renderAnalytics() {
     });
     trendChart.update();
   }
+}
+
+// ── CSV Download ──
+function adminDownloadCSV() {
+  const token    = (typeof getToken === 'function' ? getToken() : null) || sessionStorage.getItem('Atoken') || localStorage.getItem('Atoken') || '';
+  const scanType = document.getElementById('adminScanType')?.value || 'all';
+  const search   = document.getElementById('adminSearchUser')?.value.trim() || '';
+  const start    = document.getElementById('adminStartDate')?.value || '';
+  const end      = document.getElementById('adminEndDate')?.value   || '';
+
+  const params = new URLSearchParams();
+  if (scanType && scanType !== 'all') params.set('scan_type', scanType);
+  if (search)  params.set('search', search);
+  if (start)   params.set('start', start);
+  if (end)     params.set('end', end);
+
+  const baseUrl = typeof API_BASE !== 'undefined' ? API_BASE : 'http://127.0.0.1:5000';
+
+  fetch(`${baseUrl}/api/admin/export/csv?${params.toString()}`, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+  .then(res => {
+    if (res.status === 401) {
+      showToast('Session expired or unauthorized. Please log in again.', 'error');
+      return;
+    }
+    if (!res.ok) { showToast('Export failed — please try again', 'error'); return; }
+    const disposition = res.headers.get('Content-Disposition') || '';
+    const match = disposition.match(/filename="?([^"]+)"?/);
+    const filename = match ? match[1] : 'cybersentinel_admin_scans.csv';
+    return res.blob().then(blob => ({ blob, filename }));
+  })
+  .then(data => {
+    if (!data) return;
+    const { blob, filename } = data;
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast('CSV downloaded!', 'success');
+  })
+  .catch(() => showToast('Export failed — is the server running?', 'error'));
 }

@@ -5,7 +5,7 @@ const API = {
     _getToken(endpoint) {
 
         if (endpoint.startsWith('/api/admin')) {
-            return sessionStorage.getItem('Atoken') || null;
+            return sessionStorage.getItem('Atoken') || localStorage.getItem('Atoken') || null;
         }
 
         if (
@@ -13,7 +13,7 @@ const API = {
             endpoint.startsWith('/api/scan') ||
             endpoint.startsWith('/api/analytics')
         ) {
-            return sessionStorage.getItem('Utoken') || null;
+            return sessionStorage.getItem('Utoken') || localStorage.getItem('Utoken') || null;
         }
 
         if (endpoint.startsWith('/api/auth')) {

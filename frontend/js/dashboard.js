@@ -158,6 +158,29 @@ if (!requireAuth()) {
   loadDashboard();
 }
 
+function formatIST(dateString) {
+  if (!dateString) return '—';
+  try {
+    let str = String(dateString).trim();
+    if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(\.\d+)?$/.test(str)) {
+      str = str.replace(' ', 'T') + 'Z';
+    }
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return dateString;
+    return d.toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  } catch (e) {
+    return dateString;
+  }
+}
+
 async function loadDashboard() {
   const user = getUserData();
   if (user.name) {
@@ -196,9 +219,15 @@ function renderDashboard(dash, stats) {
 
   const vd = stats ? stats.by_verdict : {};
   renderDonut('chart-verdicts', {
-    labels: ['Dangerous', 'Phishing', 'Spam', 'Safe'],
-    data: [vd.dangerous || 0, vd.phishing || 0, vd.spam || 0, vd.safe || 0],
-    colors: ['#FF4757', '#FF6B35', '#FFA502', '#2ED573']
+    labels: ['Dangerous', 'Phishing', 'Spam', 'Suspicious', 'Safe'],
+    data: [
+      vd.dangerous || 0,
+      vd.phishing || 0,
+      vd.spam || 0,
+      (vd.suspicious || 0) + (vd.unknown || 0),
+      vd.safe || 0
+    ],
+    colors: ['#FF4757', '#FF6B35', '#FFA502', '#FFC107', '#2ED573']
   });
 
   const daily = stats ? stats.daily_activity : {};
@@ -221,14 +250,14 @@ function renderDashboard(dash, stats) {
 function renderRecentTable(scans) {
   const wrap = document.getElementById('recent-table');
   if (!scans.length) {
-    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>No scans yet. <a href="scan.html" class="dashboard-first-scan-link">Run your first scan →</a></p></div>`;
+    wrap.innerHTML = `<div class="empty-state"><p>No scans yet. <a href="scan.html" class="dashboard-first-scan-link">Run your first scan →</a></p></div>`;
     return;
   }
   const iconMap = { sms: 'SMS', email_address: 'EMAIL', email_comprehensive: 'EMAIL COMPREHENSIVE', url: 'URL' };
   const rows = scans.map(s => {
     const v = s.verdict || '';
     const cls = ['DANGEROUS', 'PHISHING', 'SPAM', 'FAKE', 'DISPOSABLE'].includes(v) ? 'badge-dangerous' : v === 'SUSPICIOUS' ? 'badge-suspicious' : 'badge-safe';
-    const date = new Date(s.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const date = formatIST(s.created_at);
     return `<tr class="dashboard-scan-row">
         <td><span class="dashboard-scan-type-label" style="text-transform: uppercase; font-weight: bold;">${(iconMap[s.scan_type] || s.scan_type).replace('_', ' ')}</span></td>
         <td class="dashboard-table-content" title="${s.input_text}">${s.input_text}</td>

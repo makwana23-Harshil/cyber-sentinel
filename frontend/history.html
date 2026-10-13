@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/history.css">
+  <link rel="stylesheet" href="css/user-responsive.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -41,19 +42,26 @@
       <i class="fas fa-search si"></i>
       <input type="text" id="search-input" placeholder="Search by content, verdict..." oninput="filterScans()">
     </div>
-    <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">All</button>
-    <button class="filter-btn" data-filter="sms" onclick="setFilter('sms',this)">SMS</button>
-    <button class="filter-btn" data-filter="email_address" onclick="setFilter('email_address',this)">Email Addr</button>
-    <button class="filter-btn" data-filter="email_comprehensive" onclick="setFilter('email_comprehensive',this)">Email Comprehensive</button>
-    <button class="filter-btn" data-filter="url" onclick="setFilter('url',this)">URL</button>
-    <form id="dateFilterForm" onsubmit="event.preventDefault(); loadHistory();" style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-      <span style="font-size:0.8rem; font-weight:600; color:var(--text-secondary);">From:</span>
-      <input type="date" id="startDate" class="filter-btn" style="padding: 5px 10px; border-radius: 10px; font-size: 0.82rem; border: 1px solid var(--border-soft); background: #fff; color: var(--text-primary); outline: none;">
-      <span style="font-size:0.8rem; font-weight:600; color:var(--text-secondary);">To:</span>
-      <input type="date" id="endDate" class="filter-btn" style="padding: 5px 10px; border-radius: 10px; font-size: 0.82rem; border: 1px solid var(--border-soft); background: #fff; color: var(--text-primary); outline: none;">
-      <button type="submit" class="btn btn-sm btn-primary" style="padding: 6px 12px; border-radius: 10px; font-size: 0.82rem; font-weight: 600;"><i class="fas fa-filter"></i> Filter</button>
-    </form>      
-    <button class="filter-btn threat-filter" data-filter="threats" onclick="setFilter('threats',this)">Threats Only</button>
+    
+    <div class="filter-group-pills">
+      <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn" data-filter="sms" onclick="setFilter('sms',this)">SMS</button>
+      <button class="filter-btn" data-filter="email_address" onclick="setFilter('email_address',this)">Email Addr</button>
+      <button class="filter-btn" data-filter="email_comprehensive" onclick="setFilter('email_comprehensive',this)">Email Body</button>
+      <button class="filter-btn" data-filter="url" onclick="setFilter('url',this)">URL</button>
+      <button class="filter-btn threat-filter" data-filter="threats" onclick="setFilter('threats',this)">Threats Only</button>
+    </div>
+
+    <form id="dateFilterForm" onsubmit="event.preventDefault(); loadHistory();" class="date-filter-group">
+      <span class="filter-label">From:</span>
+      <input type="date" id="startDate" class="date-picker-input">
+      <span class="filter-label">To:</span>
+      <input type="date" id="endDate" class="date-picker-input">
+      <button type="submit" class="btn btn-sm btn-primary" style="padding: 6px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 600;"><i class="fas fa-filter"></i> Filter</button>
+      <button type="button" onclick="downloadCSV()" class="btn btn-sm btn-download-csv" title="Download currently filtered results as CSV">
+        <i class="fas fa-download"></i> Download CSV
+      </button>
+    </form>
   </div>
 
   <!-- Table -->

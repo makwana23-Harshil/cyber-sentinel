@@ -4,7 +4,9 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'cybersentinel-ultra-secret-key-2024')
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    if not SECRET_KEY:
+        raise RuntimeError('Set SECRET_KEY in backend/.env or the environment.')
     JWT_ALGORITHM = 'HS256'
     JWT_EXPIRY_HOURS = 24
 
@@ -24,7 +26,7 @@ class Config:
 
     # Admin seed credentials
     ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@cybersentinel.com')
-    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'Admin@123456')
+    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
     ADMIN_NAME = 'Super Admin'
 
     # Request timeout for link inspection

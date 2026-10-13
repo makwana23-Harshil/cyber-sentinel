@@ -1,4 +1,5 @@
-let currentTab = 'user';
+const requestedLoginRole = new URLSearchParams(window.location.search).get('role');
+let currentTab = requestedLoginRole === 'admin' ? 'admin' : 'user';
 
 function switchTab(tab) {
   currentTab = tab;
@@ -9,6 +10,8 @@ function switchTab(tab) {
   document.getElementById('btn-label').textContent = tab === 'admin' ? 'Admin Sign In' : 'Sign In';
   document.getElementById('alert-area').innerHTML = '';
 }
+
+switchTab(currentTab);
 
 function togglePw() {
   const pw = document.getElementById('password');
@@ -111,20 +114,35 @@ loginForm.addEventListener('submit', async (e) => {
     if (!res.ok || !data.success) throw new Error(data.message || 'Login failed');
 
     if (data.token_name === 'Atoken') {
+      sessionStorage.removeItem('Utoken');
+      sessionStorage.removeItem('user_data');
+      localStorage.removeItem('Utoken');
+      localStorage.removeItem('user_data');
       sessionStorage.setItem('Atoken', data.token);
       sessionStorage.setItem('admin_data', JSON.stringify(data.user));
+      localStorage.setItem('Atoken', data.token);
+      localStorage.setItem('admin_data', JSON.stringify(data.user));
 
       showToast('Admin login successful! Redirecting...', 'success');
       setTimeout(() => window.location.href = 'admin.html', 1000);
     } else {
+      sessionStorage.removeItem('Atoken');
+      sessionStorage.removeItem('admin_data');
+      localStorage.removeItem('Atoken');
+      localStorage.removeItem('admin_data');
       sessionStorage.setItem('Utoken', data.token);
       sessionStorage.setItem('user_data', JSON.stringify(data.user));
+      localStorage.setItem('Utoken', data.token);
+      localStorage.setItem('user_data', JSON.stringify(data.user));
 
       showToast('Welcome back! Redirecting...', 'success');
       setTimeout(() => window.location.href = 'dashboard.html', 1000);
     }
   } catch (err) {
     alertArea.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> ${err.message}</div>`;
+    if (typeof showToast === 'function') {
+      showToast(err.message, 'error');
+    }
     btn.disabled = false;
     btn.innerHTML = `<i class="fas fa-sign-in-alt"></i> <span id="btn-label">${currentTab === 'admin' ? 'Admin Sign In' : 'Sign In'}</span>`;
   }

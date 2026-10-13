@@ -57,23 +57,34 @@ def login():
 
     if not email or not password:
         return jsonify({'success': False, 'message': 'Email and password are required'}), 400
+    if login_as not in ('user', 'admin'):
+        return jsonify({'success': False, 'message': 'Invalid login type'}), 400
 
     user = db.users.find_one({"email": email})    
     if not user or not check_password(password, user['password_hash']):
         return jsonify({'success': False, 'message': 'Invalid email or password'}), 401
     
+    if user.get('is_deleted', False):
+        return jsonify({'success': False, 'message': 'Your account has been deleted by admin'}), 403
+
     if not user.get('is_active', True):
         return jsonify({'success': False, 'message': 'Account is deactivated'}), 403
         
-    if login_as == 'admin' and user.get('role') != 'admin':
-        return jsonify({'success': False, 'message': 'Access denied: Not an admin account'}), 403
+    account_role = user.get('role', 'user')
+    if login_as != account_role:
+        message = (
+            'Access denied: Admin accounts must use Admin Login'
+            if account_role == 'admin'
+            else 'Access denied: Not an admin account'
+        )
+        return jsonify({'success': False, 'message': message}), 403
 
     now = datetime.now(timezone.utc)
     db.users.update_one({"_id": user['_id']},{"$set": {"last_login": now}})
     user['last_login'] = now
 
-    token = generate_token(str(user['_id']), user['role'])
-    token_name = 'Atoken' if user.get('role') == 'admin' else 'Utoken'
+    token = generate_token(str(user['_id']), account_role)
+    token_name = 'Atoken' if account_role == 'admin' else 'Utoken'
 
     return jsonify({'success': True,'message': 'Login successful',
         'token': token,'token_name': token_name,'user': serialize_doc(user)

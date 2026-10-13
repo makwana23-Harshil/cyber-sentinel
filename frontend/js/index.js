@@ -18,10 +18,10 @@ counters.forEach(c => observer.observe(c));
 
 // Update nav based on auth
 const uta = document.getElementById('nav-actions');
-const utoken = localStorage.getItem('Utoken');
-const atoken = localStorage.getItem('Atoken');
-if (utoken) {
-  uta.innerHTML = `<a href="dashboard.html" class="btn btn-outline btn-sm">Dashboard</a><a href="scan.html" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Scan</a>`;
-} else if (atoken) {
-  uta.innerHTML = `<a href="admin.html" class="btn btn-primary btn-sm"><i class="fas fa-crown"></i> Admin Panel</a>`;
+const utoken = sessionStorage.getItem('Utoken') || localStorage.getItem('Utoken');
+const atoken = sessionStorage.getItem('Atoken') || localStorage.getItem('Atoken');
+if (atoken) {
+  uta.innerHTML = `<a href="register.html" class="btn btn-primary btn-sm"><i class="fas fa-crown"></i> Admin Panel</a>`;
+} else if (utoken) {
+  uta.innerHTML = `<a href="register.html" class="btn btn-outline btn-sm">Dashboard</a><a href="scan.html" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Scan</a>`;
 }

@@ -22,16 +22,21 @@ function renderDonut(canvasId, { labels, data, colors }) {
   const ctx = document.getElementById(canvasId);
   if (!ctx) return;
   const total = data.reduce((a, b) => a + b, 0);
+
+  const displayData = total > 0 ? data : [1];
+  const displayColors = total > 0 ? colors : ['#E2E8F0'];
+  const displayLabels = total > 0 ? labels : ['No Scans'];
+
   activeCharts[canvasId] = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels,
+      labels: displayLabels,
       datasets: [{
-        data,
-        backgroundColor: colors,
+        data: displayData,
+        backgroundColor: displayColors,
         borderColor: '#fff',
-        borderWidth: 3,
-        hoverOffset: 6
+        borderWidth: total > 0 ? 3 : 1,
+        hoverOffset: total > 0 ? 6 : 0
       }]
     },
     options: {
@@ -44,6 +49,7 @@ function renderDonut(canvasId, { labels, data, colors }) {
           labels: { padding: 16, usePointStyle: true, pointStyle: 'circle', font: { size: 11 } }
         },
         tooltip: {
+          enabled: total > 0,
           callbacks: {
             label: (ctx) => {
               const val = ctx.raw;

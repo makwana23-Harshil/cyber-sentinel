@@ -2,7 +2,7 @@
 
 A unified AI-powered cybersecurity threat detection platform.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Start the Backend
 ```
@@ -22,16 +22,16 @@ Open `frontend/index.html` in your browser (Chrome recommended).
 
 ---
 
-## 🔐 Default Credentials
+## Admin Setup
 
-| Role  | Email | Password | Token |
-|-------|-------|----------|-------|
-| Admin | `admin@cybersentinel.com` | `Admin@123456` | `Atoken` |
-| User  | Register at `/register.html` | Your choice | `Utoken` |
+Set a unique `ADMIN_EMAIL` and strong `ADMIN_PASSWORD` in `backend/.env`, then
+run `python scripts/create_admin.py` from the `backend/` directory to create
+the administrator account. The seed script requires the configured password
+and does not use or print a built-in default credential.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 cyber-sentinel/
@@ -59,7 +59,7 @@ cyber-sentinel/
 
 ---
 
-## 🧠 Detection Modules
+## Detection Modules
 
 ### SMS Spam Detection
 - ML: TF-IDF + Multinomial Naive Bayes
@@ -89,22 +89,30 @@ cyber-sentinel/
 
 ---
 
-## 🔧 Configuration
+## Configuration
 
-Edit `backend/config.py` or create `backend/.env`:
+Configure the application in `backend/.env`:
 
 ```env
-SECRET_KEY=your-secret-key
+SECRET_KEY=<a-long-random-secret>
+MONGO_URI=<your-mongodb-connection-string>
+MONGO_DB_NAME=cyber_sentinel
+ADMIN_EMAIL=<your-admin-email>
+ADMIN_PASSWORD=<a-unique-strong-password>
 VIRUSTOTAL_API_KEY=your-vt-key
 GOOGLE_SAFE_BROWSING_API_KEY=your-gsb-key
+GOOGLE_API_KEY=your-gemini-key
 ```
+
+Keep `backend/.env` private and never commit it. The application refuses to
+start without a configured `SECRET_KEY`.
 
 **VirusTotal API** (free): https://www.virustotal.com/gui/join-us  
 **Google Safe Browsing** (free): https://developers.google.com/safe-browsing/
 
 ---
 
-## 📊 Visualizations
+## Visualizations
 
 ### User Dashboard
 - Scan types breakdown (donut)
@@ -123,7 +131,7 @@ GOOGLE_SAFE_BROWSING_API_KEY=your-gsb-key
 
 ---
 
-## 🔄 Migration to MongoDB
+## Migration to MongoDB
 
 When ready to switch from SQLite to MongoDB:
 1. Install `pymongo` and `flask-pymongo`
@@ -132,7 +140,7 @@ When ready to switch from SQLite to MongoDB:
 
 ---
 
-## 🛡️ Auth Flow
+## Auth Flow
 
 ```
 User Login  → POST /api/auth/login → token_name: "Utoken" → stored in localStorage

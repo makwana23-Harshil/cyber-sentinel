@@ -1,4 +1,27 @@
 
+function formatIST(dateString) {
+  if (!dateString) return '—';
+  try {
+    let str = String(dateString).trim();
+    if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(\.\d+)?$/.test(str)) {
+      str = str.replace(' ', 'T') + 'Z';
+    }
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return dateString;
+    return d.toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  } catch (e) {
+    return dateString;
+  }
+}
+
 const HistoryView = {currentPage: 1,pageSize: 12,searchTimer: null,
   debounceFetch() {
     clearTimeout(this.searchTimer);
@@ -58,7 +81,7 @@ const HistoryView = {currentPage: 1,pageSize: 12,searchTimer: null,
           <td style="font-weight: 800; font-family: var(--font-mono); color: ${isSafe ? 'var(--color-safe)' : (isSuspicious ? 'var(--color-suspicious)' : 'var(--color-malicious)')};">
             ${s.risk_score}
           </td>
-          <td style="font-size: 0.78rem; color: var(--text-dim);">${s.created_at}</td>
+          <td style="font-size: 0.78rem; color: var(--text-dim);">${formatIST(s.created_at)}</td>
           <td>
             <div style="display: flex; gap: 6px;">
               <button class="btn-cyber btn-secondary btn-sm" onclick="HistoryView.openDetailModal('${s.id}')">Inspect</button>
@@ -159,7 +182,7 @@ const HistoryView = {currentPage: 1,pageSize: 12,searchTimer: null,
           <div>
             <div style="font-size: 1.2rem; font-weight: 800; color: ${scoreColor};">${scan.prediction}</div>
             <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
-              Risk Level: <b>${scan.risk_level}</b> • Confidence: <b>${scan.confidence.toFixed(1)}%</b> • ${scan.created_at}
+              Risk Level: <b>${scan.risk_level}</b> • Confidence: <b>${scan.confidence.toFixed(1)}%</b> • ${formatIST(scan.created_at)}
             </div>
           </div>
           <div style="text-align: right;">
@@ -220,7 +243,7 @@ async function loadHistory() {
   }
 }
 
-const iconMap = { sms: 'SMS', email_address: 'EMAIL', email_comprehensive: 'EMAIL COMPREHENSIVE', url: 'URL' };
+const iconMap = { sms: 'SMS', email_address: 'EMAIL ADDRESS', 'email-address': 'EMAIL ADDRESS', email_comprehensive: 'EMAIL COMPREHENSIVE', url: 'URL' };
 const threatVerdicts = ['DANGEROUS', 'PHISHING', 'SPAM', 'FAKE', 'DISPOSABLE', 'INVALID'];
 
 function setFilter(filter, btn) {
@@ -264,21 +287,22 @@ function renderTable(scans) {
       if (['DANGEROUS', 'PHISHING', 'SPAM'].includes(v)) badge = 'badge-dangerous';
       else if (v === 'SUSPICIOUS') badge = 'badge-suspicious';
       
-      const date = new Date(s.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const date = formatIST(s.created_at);
       
-      const iconMap = { sms: 'SMS', email_address: 'EMAIL', email_comprehensive: 'BODY', url: 'URL' };
-      const iconText = iconMap[s.scan_type] || 'SCAN';
+      const iconMap = { sms: 'SMS', email_address: 'EMAIL ADDRESS', 'email-address': 'EMAIL ADDRESS', email_comprehensive: 'EMAIL COMPREHENSIVE', url: 'URL' };
+      const iconText = iconMap[s.scan_type] || s.scan_type?.replace(/_|-/g, ' ').toUpperCase() || 'SCAN';
+
+      const riskVal = Math.round(s.risk_score || 0);
+      const riskColor = riskVal >= 65 ? 'var(--danger)' : riskVal >= 35 ? 'var(--warning)' : 'var(--success)';
 
       return `
         <tr onclick="toggleDetail('${s.id}', this)" style="cursor: pointer;">
-          <td>${startIndex + index + 1}</td>
-          <td>${iconText}</td>
-          <td class="history-content-preview">${s.input_text}</td>
-          <td><span class="badge ${badge}">${v || 'LEGITIMATE'}</span></td>
-          <td>
-            <div class="risk-bar-bg"><div class="risk-bar-fill ${badge.replace('badge', 'risk')}" style="width: ${s.risk_score || 0}%"></div></div>
-          </td>
-          <td class="history-date">${date}</td>
+          <td data-label="#">${startIndex + index + 1}</td>
+          <td data-label="Type">${iconText}</td>
+          <td class="history-content-preview" data-label="Content" title="${(s.input_text||'').replace(/"/g, '&quot;')}"><span class="mobile-table-value">${s.input_text}</span></td>
+          <td data-label="Verdict"><span class="badge ${badge}">${v || 'LEGITIMATE'}</span></td>
+          <td data-label="Risk" style="font-weight: 700; font-family: monospace; font-size: 0.85rem; color: ${riskColor};">${riskVal}/100</td>
+          <td class="history-date" data-label="Scanned">${date}</td>
         </tr>
         <tr id="detail-${s.id}" class="detail-row hidden">
           <td colspan="6">
@@ -329,7 +353,7 @@ function renderTable(scans) {
         </tr>`;
     }).join('');
     
-    wrap.innerHTML = `<table><thead><tr><th>Sr.No</th><th>Type</th><th>Content</th><th>Verdict</th><th>Risk</th><th>Scanned</th></tr></thead><tbody>${rows}</tbody></table>`;
+    wrap.innerHTML = `<table class="history-scans-table"><thead><tr><th>Sr.No</th><th>Type</th><th>Content</th><th>Verdict</th><th>Risk</th><th>Scanned</th></tr></thead><tbody>${rows}</tbody></table>`;
     
     if (pagination) {
       pagination.style.display = 'block';
@@ -363,6 +387,47 @@ function escHtml(str) {
   return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// ── CSV Download ──
+function downloadCSV() {
+  const token = (typeof getToken === 'function' ? getToken() : null) || sessionStorage.getItem('Utoken') || localStorage.getItem('Utoken') || '';
+  const scanType  = currentFilter === 'all' || currentFilter === 'threats' ? '' : currentFilter;
+  const startDate = document.getElementById('startDate')?.value  || '';
+  const endDate   = document.getElementById('endDate')?.value    || '';
 
+  const params = new URLSearchParams();
+  if (scanType)   params.set('scan_type', scanType);
+  if (startDate)  params.set('start', startDate);
+  if (endDate)    params.set('end', endDate);
 
+  const baseUrl = typeof API_BASE !== 'undefined' ? API_BASE : 'http://127.0.0.1:5000';
 
+  fetch(`${baseUrl}/api/user/export/csv?${params.toString()}`, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+  .then(res => {
+    if (res.status === 401) {
+      showToast('Session expired or unauthorized. Please log in again.', 'error');
+      return;
+    }
+    if (!res.ok) { showToast('Export failed — please try again', 'error'); return; }
+    const disposition = res.headers.get('Content-Disposition') || '';
+    const match = disposition.match(/filename="?([^"]+)"?/);
+    const filename = match ? match[1] : 'cybersentinel_history.csv';
+    return res.blob().then(blob => ({ blob, filename }));
+  })
+  .then(data => {
+    if (!data) return;
+    const { blob, filename } = data;
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast('CSV downloaded!', 'success');
+  })
+  .catch(() => showToast('Export failed — is the server running?', 'error'));
+}

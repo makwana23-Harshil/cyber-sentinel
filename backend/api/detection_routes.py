@@ -121,7 +121,7 @@ def scan_email_address():
         
     result = {"verdict": verdict,"risk_score": risk_score,"sender_analysis": sender_analysis,"llm_analysis": email_llm_analysis,"risk_evidence": evidence}
     try:
-        scan_id = _save_scan('email-address',email,result,user_id=g.current_user['_id'])
+        scan_id = _save_scan('email_address', email, result, user_id=g.current_user['_id'])
     except Exception as e:
         print("Error saving to history:", repr(e))
         scan_id = None
@@ -139,14 +139,35 @@ def scan_email_comprehensive():
         inspect_links = data.get('inspect_links', True)
 
         if not sender and not body:
-            return jsonify({'success': False,'error': 'Sender or email body is required'}), 400
-        result = email_detector.analyze_email_comprehensive(sender=sender,subject=subject,body=body,inspect_links=inspect_links,use_llm=use_llm)
-        return jsonify({'success': True,'result': result}), 200
+            return jsonify({'success': False, 'error': 'Sender or email body is required'}), 400
+
+        result = email_detector.analyze_email_comprehensive(
+            sender=sender, subject=subject, body=body,
+            inspect_links=inspect_links, use_llm=use_llm
+        )
+
+        # Build a human-readable preview for the history table
+        preview_parts = []
+        if sender:  preview_parts.append(f"From: {sender}")
+        if subject: preview_parts.append(f"Subject: {subject}")
+        if body:    preview_parts.append(f"Body: {body[:200]}")
+        input_preview = " | ".join(preview_parts)
+
+        # Save scan to MongoDB so it appears in User & Admin history
+        scan_id = _save_scan(
+            'email_comprehensive',          # underscores — matches frontend iconMap key
+            input_preview,
+            result,
+            user_id=g.current_user['_id']
+        )
+
+        return jsonify({'success': True, 'scan_id': str(scan_id), 'result': result}), 200
+
     except FileNotFoundError as e:
-        return jsonify({'success': False,'message': str(e)}), 503
+        return jsonify({'success': False, 'message': str(e)}), 503
     except Exception as e:
-        print("EMAIL COMPREHENSIVE ANALYSIS ERROR:",repr(e))
-        return jsonify({'success': False,'message': f'Analysis error: {str(e)}'}), 500
+        print("EMAIL COMPREHENSIVE ANALYSIS ERROR:", repr(e))
+        return jsonify({'success': False, 'message': f'Analysis error: {str(e)}'}), 500
 
 @detect_bp.route('/url', methods=['POST'])
 @user_required
