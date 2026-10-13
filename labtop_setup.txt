@@ -1,0 +1,10 @@
+from the cyber-sentinel 
+python -m venv venv
+
+venv\Scripts\activate
+
+cd backend
+pip install requirements.txt
+
+python app.py
+
